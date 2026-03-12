@@ -41,6 +41,48 @@ async def on_ready():
     print("Bot Online")
 
 
+# FIXED JOIN COMMAND
+@bot.command()
+async def join(ctx):
+
+    if ctx.author.voice is None:
+        await ctx.send("❌ You must join a voice channel first.")
+        return
+
+    channel = ctx.author.voice.channel
+
+    if ctx.voice_client:
+        await ctx.voice_client.move_to(channel)
+    else:
+        await channel.connect()
+
+    await ctx.send(f"✅ Joined **{channel.name}**")
+
+
+@bot.command()
+async def play(ctx, *, url):
+
+    if not ctx.author.voice:
+        await ctx.send("❌ Join VC first")
+        return
+
+    if ctx.voice_client is None:
+        await ctx.invoke(join)
+
+    player = await YTDLSource.from_url(url, loop=bot.loop)
+
+    ctx.voice_client.play(player)
+
+    await ctx.send(f"🎵 Now playing {player.title}")
+
+
+bot.run(TOKEN)
+
+@bot.event
+async def on_ready():
+    print("Bot Online")
+
+
 @bot.command()
 async def join(ctx):
     if ctx.author.voice:
